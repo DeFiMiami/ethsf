@@ -8,7 +8,7 @@
     "start": "node build/app.js",
     "build": "rimraf ./build && tsc",
     "build:frontend": "cd ../frontend && npm run build && cp -a build ../nodejs/build/frontend",
-    "deploy": "npm run build && npm run build:frontend && export DOCKER_DEFAULT_PLATFORM=linux/amd64 && heroku container:push --app defimiami-gogas web && heroku container:release --app defimiami-gogas web"
+    "deploy": "npm run build && export DOCKER_DEFAULT_PLATFORM=linux/amd64 && heroku container:push --app firemask-metawall web && heroku container:release --app firemask-metawall web"
   },
   "keywords": [],
   "author": "",
