@@ -59,7 +59,10 @@ export const onTransaction: OnTransactionHandler = async ({
   // const url = 'https://firemask-metawall.herokuapp.com?t';
 
   const t = JSON.stringify(transaction);
+  console.log('Before fetch');
   const info = await fetch(url + encodeURIComponent(t));
+  console.log('After fetch');
   const insights = await info.json();
+  console.log('After JSON');
   return { insights };
 };

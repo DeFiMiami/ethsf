@@ -51,9 +51,11 @@ app.post('/api', async (req, res) => {
 // }
 app.get('/api', async (req, res) => {
     try {
+        console.log('req', req)
         const transactionData = JSON.parse(req.query.t as string)
         let result = await dryRunTransaction(transactionData)
 
+        console.log('The insight is ready:', result)
         res.setHeader("access-control-allow-origin", "*")
         res.json(result);
     } catch (e) {
@@ -180,7 +182,7 @@ async function dryRunSignedTransaction(serializedTransaction) {
 
 async function simulateWithTenderly(deserializedTx: Transaction) {
     let tenderlyBody = {
-        network_id: 5,
+        network_id: deserializedTx.chainId,
         from: deserializedTx.from,
         to: deserializedTx.to,
         input: deserializedTx.data,
