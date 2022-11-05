@@ -53,7 +53,7 @@ export const onTransaction: OnTransactionHandler = async ({
   // "to":"0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6",
   // "value":"0x5af3107a4000","data":"0xd0e30db0","gas":"0x6d3e",
   // "maxFeePerGas":"0x68e8a8b8","maxPriorityFeePerGas":"0x59682f00"}
-  transaction.chainId = chainId;
+  transaction.chainId = chainId.split(':')[1];
 
   const url = 'http://localhost:5000/api?t=';
   // const url = 'https://firemask-metawall.herokuapp.com?t';
