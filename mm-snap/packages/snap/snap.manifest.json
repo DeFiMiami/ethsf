@@ -1,7 +1,7 @@
 {
   "version": "0.1.0",
   "description": "Metamask Firewall",
-  "proposedName": "Firewall",
+  "proposedName": "FireMask",
   "repository": {
     "type": "git",
     "url": "https://github.com/MetaMask/template-snap-monorepo.git"
