@@ -1,0 +1,39 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start:dev": "ts-node-dev src/app.ts",
+    "start": "node build/app.js",
+    "build": "rimraf ./build && tsc",
+    "build:frontend": "cd ../frontend && npm run build && cp -a build ../nodejs/build/frontend",
+    "deploy": "npm run build && npm run build:frontend && export DOCKER_DEFAULT_PLATFORM=linux/amd64 && heroku container:push --app defimiami-gogas web && heroku container:release --app defimiami-gogas web"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@typechain/ethers-v5": "^10.1.0",
+    "@types/express": "^4.17.1",
+    "@types/node": "^16.11.10",
+    "eslint": "^8.23.1",
+    "rimraf": "^3.0.2",
+    "ts-node": "10.7.0",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "4.5.2"
+  },
+  "dependencies": {
+    "axios": "^0.27.2",
+    "console-stamp": "^3.0.6",
+    "dotenv": "^16.0.2",
+    "eth-sig-util": "^3.0.1",
+    "ethers": "^5.7.1",
+    "express": "^4.18.1",
+    "jsonwebtoken": "^8.5.1",
+    "moment": "^2.29.4",
+    "sqlite3": "^5.1.2",
+    "stripe": "^10.13.0",
+    "typeorm": "^0.3.10"
+  }
+}
