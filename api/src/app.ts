@@ -4,6 +4,7 @@ import {ethers, Transaction} from "ethers";
 import axios from "axios";
 import {legos} from "@studydefi/money-legos";
 import * as fs from "fs";
+import path from "path";
 
 require('console-stamp')(console);
 
@@ -12,6 +13,7 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded());
+app.use(express.static("public"));
 
 const port = process.env.PORT == null ? 5000 : process.env.PORT;
 
@@ -19,7 +21,11 @@ app.listen(port, () => {
     return console.log(`Express is listening at http://localhost:${port}`);
 });
 
-app.post('/', async (req, res) => {
+app.get("/", (req, res) => {
+ res.sendFile(path.join(__dirname, "..", "public", "index.html"));
+});
+
+app.post('/api', async (req, res) => {
     try {
         let signedTransaction = req.body.transaction;
         let result = await dryRunTransaction(signedTransaction);
