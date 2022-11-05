@@ -133,13 +133,16 @@ const Index = () => {
         width: '300px', height: '300px', display: 'flex',
         justifyContent: 'center', alignItems: 'center'
       }} src={logo} alt="Logo"/>
-      <Heading>
-        <Span>FireMask MetaWall</Span>
+      <Heading style={{fontSize: '4rem'}}>
+        <Span style={{color: '#d02c1c'}}>Fire</Span>
+        <Span style={{color: 'rgb(254 135 23)'}}>Mask</Span>
+        &nbsp;
+        <Span style={{color: 'rgb(223 89 34)'}}>Meta</Span>
+        <Span style={{color: '#d02c1c'}}>Wall</Span>
+        &nbsp;
+        <Span>- MetaMask Firewall</Span>
       </Heading>
-      <Subtitle>
-        MetaMask Firewall
-      </Subtitle>
-      <CardContainer>
+      <CardContainer style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
         {state.error && (
           <ErrorMessage>
             <b>An error happened:</b> {state.error.message}
@@ -173,48 +176,11 @@ const Index = () => {
           />
         )}
         {shouldDisplayReconnectButton(state.installedSnap) && (
-          <Card
-            content={{
-              title: 'Reconnect',
-              description:
-                'Update snap',
-              button: (
-                <ReconnectButton
-                  onClick={handleConnectClick}
-                  disabled={!state.installedSnap}
-                />
-              ),
-            }}
+          <ReconnectButton
+            onClick={handleConnectClick}
             disabled={!state.installedSnap}
           />
         )}
-        <Card
-          content={{
-            title: 'Send Hello message',
-            description:
-              'To MetaWall',
-            button: (
-              <SendHelloButton
-                onClick={handleSendHelloClick}
-                disabled={!state.installedSnap}
-              />
-            ),
-          }}
-          disabled={!state.installedSnap}
-          fullWidth={
-            state.isFlask &&
-            Boolean(state.installedSnap) &&
-            !shouldDisplayReconnectButton(state.installedSnap)
-          }
-        />
-        <Notice>
-          <p>
-            Please note that the <b>snap.manifest.json</b> and{' '}
-            <b>package.json</b> must be located in the server root directory and
-            the bundle must be hosted at the location specified by the location
-            field.
-          </p>
-        </Notice>
       </CardContainer>
     </Container>
   );
