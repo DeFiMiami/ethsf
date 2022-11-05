@@ -34,6 +34,7 @@
     "moment": "^2.29.4",
     "sqlite3": "^5.1.2",
     "stripe": "^10.13.0",
-    "typeorm": "^0.3.10"
+    "typeorm": "^0.3.10",
+    "@studydefi/money-legos": "^2.4.2"
   }
 }
