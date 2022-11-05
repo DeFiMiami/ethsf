@@ -23,13 +23,16 @@ app.post('/', async (req, res) => {
     try {
         let signedTransaction = req.body.transaction;
         let result = await dryRunTransaction(signedTransaction);
+        res.setHeader("access-control-allow-origin", "*")
         res.json(result);
     } catch (e) {
         console.log(e)
         res.status(500).json(e);
     }
 });
+
 app.get('/', async (req, res) => {
+    res.setHeader("access-control-allow-origin", "*")
     res.json({"Firemask Metawall": "Metamask Firewall"});
 });
 
@@ -63,8 +66,7 @@ async function dryRunTransaction(serializedTransaction) {
                 const iface = new ethers.utils.Interface(legos.erc20.abi);
                 const decodedArgs = iface.decodeFunctionData(callTrace.input.slice(0, 10), callTrace.input)
                 const functionName = iface.getFunction(callTrace.input.slice(0, 10)).name
-                console.log(functionName)
-                console.log(decodedArgs)
+                console.log(functionName, decodedArgs)
                 if (functionName == "transfer") {
                     let toName = decodedArgs[0]
                     if (contractsMap[toName]) {
@@ -83,7 +85,7 @@ async function dryRunTransaction(serializedTransaction) {
                     result[title] = description
                 }
             } catch (e) {
-                console.log("Failed to decode callTrace for " + contract.address)
+                console.log(e, "Failed to decode callTrace for " + contract.address)
             }
         }
     }
@@ -116,7 +118,7 @@ async function simulateWithTenderly(deserializedTx: Transaction) {
         }
     );
     let tenderlyData = tenderlyResponse.data;
-    fs.writeFile('tenderly-response.json', JSON.stringify(tenderlyData), function (err) {
+    fs.writeFile('http-examples/tenderly-response.json', JSON.stringify(tenderlyData), function (err) {
         if (err) {
             return console.error(err);
         }
