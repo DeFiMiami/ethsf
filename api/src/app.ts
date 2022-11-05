@@ -3,6 +3,7 @@ import * as dotenv from "dotenv";
 import {BigNumber, ethers, Transaction} from "ethers";
 import axios from "axios";
 import {legos} from "@studydefi/money-legos";
+import * as fs from "fs";
 
 require('console-stamp')(console);
 
@@ -57,9 +58,19 @@ async function dryRunTransaction(serializedTransaction) {
                 console.log(functionName)
                 console.log(decodedArgs)
                 if (functionName == "transfer") {
-                    let toAddress = decodedArgs[0]
-                    let amount = (decodedArgs[1] as BigNumber).toString()
-                    let title = "Transfer " + amount + " " + contract["token_data"]["symbol"] + " to " + toAddress;
+                    let toName = decodedArgs[0]
+                    if (contractsMap[toName]) {
+                        let toContract = contractsMap[toName]
+                        if (toContract.contract_name) {
+                            toName = toContract.contract_name
+                        }
+                    }
+                    if(deserializedTx.from == toName){
+                        toName = "Me"
+                    }
+
+                    let amount = (decodedArgs[1].toNumber()/1e18).toPrecision(6)
+                    let title = "Transfer " + amount + " " + contract["token_data"]["symbol"] + " to " + toName;
                     let description = "OK";
                     result[title] = description
                 }
@@ -81,7 +92,6 @@ async function simulateWithTenderly(deserializedTx: Transaction) {
         gas_price: 100,
         value: deserializedTx.value.toString(),
     };
-    console.log(JSON.stringify(tenderlyBody))
     const tenderlyUrl =
         "https://api.tenderly.co/api/v1/account/" +
         process.env.TENDERLY_USER +
@@ -98,7 +108,12 @@ async function simulateWithTenderly(deserializedTx: Transaction) {
         }
     );
     let tenderlyData = tenderlyResponse.data;
-    console.log(JSON.stringify(tenderlyData))
+    fs.writeFile('tenderly-response.json', JSON.stringify(tenderlyData), function (err) {
+        if (err) {
+            return console.error(err);
+        }
+        console.log("File created!");
+    });
 
     return tenderlyData
 }
