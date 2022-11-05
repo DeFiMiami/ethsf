@@ -170,24 +170,26 @@ async function dryRunTransaction(transaction) {
                 }
             } else if (contract.standards.includes("erc721")) {
                 if (functionName == "safeTransferFrom" || functionName == "transferFrom") {
-                    let recipient = lookupContractName(decodedArgs[0])
-                    let amount = bigNumberToHumanReadable(decodedArgs[1] as BigNumber)
+                    let from = lookupContractName(decodedArgs[0])
+                    let recipient = lookupContractName(decodedArgs[1])
+                    let tokenId = (decodedArgs[2] as BigNumber).toNumber();
 
-                    let title = ++resultIndex + ". NFT Transfer " + amount + " " + tokenSymbol + " to " + recipient;
-                    result[title] = ""
+                    let title = ++resultIndex + ". NFT Transfer";
+                    let description = "Transfer NFT token #" + tokenId + " to " + recipient;
+                    result[title] = description
                 }
                 if (functionName == "setApprovalForAll") {
                     let operator = lookupContractName(decodedArgs[0])
 
                     let title = ++resultIndex + ". NFT approving to all";
-                    result[title] = ""
+                    result[title] = "TODO"
                 }
                 if (functionName == "approve") {
                     let addressTo = lookupContractName(decodedArgs[0])
-                    let tokenId = decodedArgs[0]
+                    let tokenId = (decodedArgs[1] as BigNumber).toNumber();
 
-                    let title = ++resultIndex + ". NFT token#" + tokenId + " to " + addressTo;
-                    result[title] = ""
+                    let title = ++resultIndex + ". NFT approve";
+                    result[title] = "TODO"
                 }
             }
         } catch (e) {
