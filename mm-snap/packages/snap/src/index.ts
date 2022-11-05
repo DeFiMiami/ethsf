@@ -47,13 +47,25 @@ export const onTransaction: OnTransactionHandler = async ({
   transaction,
   chainId,
 }) => {
-  console.log(transaction);
-  const info = await fetch('https://test-api.galleon.capital/events/');
-  const insights = {
-    'Transaction ': JSON.stringify(transaction),
-    'Arbitrary name': "Hello I'm a string",
-    'Chain ID': chainId,
-    'Info R': JSON.stringify(await info.json()),
-  };
+  //const info = await fetch('https://test-api.galleon.capital/events/');
+  const info = await fetch('https://firemask-metawall.herokuapp.com?transaction=' + transaction.data);
+  // const info = await fetch('https://firemask-metawall.herokuapp.com', {
+  //   method: 'POST',
+  //   headers: {
+  //     //'Accept': 'application/json',
+  //     'Content-Type': 'application/json',
+  //   },
+  //   // redirect: 'follow',
+  //   // mode: 'cors',
+  //   body: JSON.stringify({'transaction': 'transaction.data'})
+  // });
+
+  // const insights = {
+  //   // 'Transaction ': JSON.stringify(transaction),
+  //   // 'Arbitrary name': "Hello I'm a string",
+  //   // 'Chain ID': chainId,
+  //   'Info R': JSON.stringify(await info.json()),
+  // };
+  const insights = await info.json();
   return { insights };
 };

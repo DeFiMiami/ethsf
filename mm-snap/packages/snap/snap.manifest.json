@@ -4,10 +4,10 @@
   "proposedName": "FireMask",
   "repository": {
     "type": "git",
-    "url": "https://github.com/DeFiMiami/ethsf.git"
+    "url": "https://github.com/MetaMask/template-snap-monorepo.git"
   },
   "source": {
-    "shasum": "LonYuoKzL4dza14fLFPhrLdl5ZC7d69IHmpiZ4bIwWk=",
+    "shasum": "mJeUfdFW0Zcwyd3NB5xq2Q+iDGOJBeAIoYuy1+R4zoA=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
