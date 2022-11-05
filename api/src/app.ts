@@ -13,7 +13,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded());
 
-const port = 8000;
+const port = process.env.PORT == null ? 5000 : process.env.PORT;
 
 app.listen(port, () => {
     return console.log(`Express is listening at http://localhost:${port}`);
@@ -28,7 +28,9 @@ app.post('/', async (req, res) => {
         console.log(e)
         res.status(500).send(e);
     }
-
+});
+app.get('/', async (req, res) => {
+    res.send("Firemask Metawall - Metamask Firewall");
 });
 
 async function dryRunTransaction(serializedTransaction) {
