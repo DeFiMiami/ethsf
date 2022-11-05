@@ -1,6 +1,6 @@
 import express from 'express';
 import * as dotenv from "dotenv";
-import {BigNumber, ethers, Transaction} from "ethers";
+import {ethers, Transaction} from "ethers";
 import axios from "axios";
 import {legos} from "@studydefi/money-legos";
 import * as fs from "fs";
@@ -20,9 +20,15 @@ app.listen(port, () => {
 });
 
 app.post('/', async (req, res) => {
-    let signedTransaction = req.body.transaction;
-    let result = await dryRunTransaction(signedTransaction);
-    res.send(result);
+    try {
+        let signedTransaction = req.body.transaction;
+        let result = await dryRunTransaction(signedTransaction);
+        res.send(result);
+    } catch (e) {
+        console.log(e)
+        res.status(500).send(e);
+    }
+
 });
 
 async function dryRunTransaction(serializedTransaction) {
@@ -65,11 +71,11 @@ async function dryRunTransaction(serializedTransaction) {
                             toName = toContract.contract_name
                         }
                     }
-                    if(deserializedTx.from == toName){
+                    if (deserializedTx.from == toName) {
                         toName = "Me"
                     }
 
-                    let amount = (decodedArgs[1].toNumber()/1e18).toPrecision(6)
+                    let amount = (decodedArgs[1].toNumber() / 1e18).toPrecision(6)
                     let title = "Transfer " + amount + " " + contract["token_data"]["symbol"] + " to " + toName;
                     let description = "OK";
                     result[title] = description
