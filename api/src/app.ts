@@ -120,30 +120,50 @@ async function dryRunTransaction(transaction) {
                 const functionName = iface.getFunction(callTrace.input.slice(0, 10)).name
                 console.log(functionName, decodedArgs)
 
-                if (functionName == "transfer") {
-                    let recipient = lookupContractName(decodedArgs[0])
-                    let amount = bigNumberToHumanReadable(decodedArgs[1] as BigNumber)
+                if (contract.standards.includes("erc20")) {
+                    if (functionName == "transfer") {
+                        let recipient = lookupContractName(decodedArgs[0])
+                        let amount = bigNumberToHumanReadable(decodedArgs[1] as BigNumber)
 
-                    let title = ++resultIndex + ". Transfer " + amount + " " + tokenSymbol + " to " + recipient;
-                    let description = "OK";
-                    result[title] = description
-                }
-                if (functionName == "transferFrom") {
-                    let sender = lookupContractName(decodedArgs[0])
-                    let recipient = lookupContractName(decodedArgs[1])
-                    let amount = bigNumberToHumanReadable(decodedArgs[2] as BigNumber);
+                        let title = ++resultIndex + ". Transfer " + amount + " " + tokenSymbol + " to " + recipient;
+                        result[title] = "OK"
+                    }
+                    if (functionName == "transferFrom") {
+                        let sender = lookupContractName(decodedArgs[0])
+                        let recipient = lookupContractName(decodedArgs[1])
+                        let amount = bigNumberToHumanReadable(decodedArgs[2] as BigNumber);
 
-                    let title = ++resultIndex + ". Transfer " + amount + " " + tokenSymbol + " to " + recipient;
-                    let description = "OK";
-                    result[title] = description
-                }
-                if (functionName == "approve") {
-                    let spender = lookupContractName(decodedArgs[0])
-                    let amount = bigNumberToHumanReadable(decodedArgs[2] as BigNumber);
+                        let title = ++resultIndex + ". Transfer " + amount + " " + tokenSymbol + " to " + recipient;
+                        result[title] = "OK"
+                    }
+                    if (functionName == "approve") {
+                        let spender = lookupContractName(decodedArgs[0])
+                        let amount = bigNumberToHumanReadable(decodedArgs[2] as BigNumber);
 
-                    let title = ++resultIndex + ". Approve " + amount + " " + tokenSymbol + " to " + spender;
-                    let description = "OK";
-                    result[title] = description
+                        let title = ++resultIndex + ". Approve " + amount + " " + tokenSymbol + " to " + spender;
+                        result[title] = "OK"
+                    }
+                } else if (contract.standards.includes("erc721")) {
+                    if (functionName == "safeTransferFrom" || functionName == "transferFrom") {
+                        let recipient = lookupContractName(decodedArgs[0])
+                        let amount = bigNumberToHumanReadable(decodedArgs[1] as BigNumber)
+
+                        let title = ++resultIndex + ". NFT Transfer " + amount + " " + tokenSymbol + " to " + recipient;
+                        result[title] = "OK"
+                    }
+                    if (functionName == "setApprovalForAll") {
+                        let operator = lookupContractName(decodedArgs[0])
+
+                        let title = ++resultIndex + ". NFT approving to all";
+                        result[title] = "WARNING"
+                    }
+                    if (functionName == "approve") {
+                        let addressTo = lookupContractName(decodedArgs[0])
+                        let tokenId = decodedArgs[0]
+
+                        let title = ++resultIndex + ". NFT token#" + tokenId + " to " + addressTo;
+                        result[title] = "WARNING"
+                    }
                 }
             } catch (e) {
                 console.log(e, "Failed to decode callTrace for " + contract.address)
