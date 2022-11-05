@@ -169,14 +169,19 @@ async function dryRunTransaction(transaction) {
                     result[title] = ""
                 }
             } else if (contract.standards.includes("erc721")) {
+
                 if (functionName == "safeTransferFrom" || functionName == "transferFrom") {
                     let from = lookupContractName(decodedArgs[0])
                     let recipient = lookupContractName(decodedArgs[1])
                     let tokenId = (decodedArgs[2] as BigNumber).toNumber();
 
-                    let title = ++resultIndex + ". NFT Transfer";
-                    let description = "Transfer NFT token #" + tokenId + " to " + recipient;
-                    result[title] = description
+                    const quicknodeData = getNFTinfo(from,
+                          contract["address"], tokenId)
+                          .then((result) => console.log(result))
+
+                    // let title = ++resultIndex + ". NFT Transfer";
+                    // let description = "Transfer NFT token #" + tokenId + " to " + recipient;
+                    result['NFT Indights'] = quicknodeData
                 }
                 if (functionName == "setApprovalForAll") {
                     let operator = lookupContractName(decodedArgs[0])
