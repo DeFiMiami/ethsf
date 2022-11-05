@@ -118,21 +118,19 @@ const Index = () => {
     }
   };
 
-  const handleSendHelloClick = async () => {
-    try {
-      await sendHello();
-    } catch (e) {
-      console.error(e);
-      dispatch({type: MetamaskActions.SetError, payload: e});
-    }
-  };
-
   return (
     <Container>
-      <img style={{
-        width: '300px', height: '300px', display: 'flex',
-        justifyContent: 'center', alignItems: 'center'
-      }} src={logo} alt="Logo"/>
+      <img
+        style={{
+          width: '300px',
+          height: '300px',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+        src={logo}
+        alt="Logo"
+      />
       <Heading style={{fontSize: '4rem'}}>
         <Span style={{color: '#d02c1c'}}>Fire</Span>
         <Span style={{color: 'rgb(254 135 23)'}}>Mask</Span>
