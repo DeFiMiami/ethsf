@@ -23,14 +23,14 @@ app.post('/', async (req, res) => {
     try {
         let signedTransaction = req.body.transaction;
         let result = await dryRunTransaction(signedTransaction);
-        res.send(result);
+        res.json(result);
     } catch (e) {
         console.log(e)
-        res.status(500).send(e);
+        res.status(500).json(e);
     }
 });
 app.get('/', async (req, res) => {
-    res.send("Firemask Metawall - Metamask Firewall");
+    res.json({"Firemask Metawall": "Metamask Firewall"});
 });
 
 async function dryRunTransaction(serializedTransaction) {
