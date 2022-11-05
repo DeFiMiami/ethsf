@@ -94,7 +94,7 @@ async function dryRunTransaction(transaction) {
     let resultIndex = 0
 
     function bigNumberToHumanReadable(amount: BigNumber) {
-        return amount.toString();
+        return amount.div(1e9).toString();
     }
 
     for (let i = 0; i < callTraces.length; i++) {
@@ -107,7 +107,8 @@ async function dryRunTransaction(transaction) {
             continue
         }
 
-        if (contract.standards && contract.standards.includes("erc20")) {
+        if (contract.standards &&
+            (contract.standards.includes("erc20") || contract.standards.includes("erc721"))) {
             let tokenSymbol = contract["token_data"]["symbol"];
             if (tokenSymbol == null) {
                 tokenSymbol = contract["contract_name"]
@@ -133,6 +134,14 @@ async function dryRunTransaction(transaction) {
                     let amount = bigNumberToHumanReadable(decodedArgs[2] as BigNumber);
 
                     let title = ++resultIndex + ". Transfer " + amount + " " + tokenSymbol + " to " + recipient;
+                    let description = "OK";
+                    result[title] = description
+                }
+                if (functionName == "approve") {
+                    let spender = lookupContractName(decodedArgs[0])
+                    let amount = bigNumberToHumanReadable(decodedArgs[2] as BigNumber);
+
+                    let title = ++resultIndex + ". Approve " + amount + " " + tokenSymbol + " to " + spender;
                     let description = "OK";
                     result[title] = description
                 }
