@@ -3,6 +3,7 @@ import {
   OnRpcRequestHandler,
 } from '@metamask/snap-types';
 
+
 /**
  * Get a message from the origin. For demonstration purposes only.
  *
@@ -47,25 +48,18 @@ export const onTransaction: OnTransactionHandler = async ({
   transaction,
   chainId,
 }) => {
-  //const info = await fetch('https://test-api.galleon.capital/events/');
-  const info = await fetch('https://firemask-metawall.herokuapp.com?transaction=' + transaction.data);
-  // const info = await fetch('https://firemask-metawall.herokuapp.com', {
-  //   method: 'POST',
-  //   headers: {
-  //     //'Accept': 'application/json',
-  //     'Content-Type': 'application/json',
-  //   },
-  //   // redirect: 'follow',
-  //   // mode: 'cors',
-  //   body: JSON.stringify({'transaction': 'transaction.data'})
-  // });
+  // Example of tx
+  // {"from":"0xc1531732b4f63b77a5ea38f4e5dbf5553f02c9be",
+  // "to":"0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6",
+  // "value":"0x5af3107a4000","data":"0xd0e30db0","gas":"0x6d3e",
+  // "maxFeePerGas":"0x68e8a8b8","maxPriorityFeePerGas":"0x59682f00"}
+  transaction.chainId = chainId;
 
-  // const insights = {
-  //   // 'Transaction ': JSON.stringify(transaction),
-  //   // 'Arbitrary name': "Hello I'm a string",
-  //   // 'Chain ID': chainId,
-  //   'Info R': JSON.stringify(await info.json()),
-  // };
+  const url = 'http://localhost:5000/api?t=';
+  // const url = 'https://firemask-metawall.herokuapp.com?t';
+
+  const t = JSON.stringify(transaction);
+  const info = await fetch(url + encodeURIComponent(t));
   const insights = await info.json();
   return { insights };
 };

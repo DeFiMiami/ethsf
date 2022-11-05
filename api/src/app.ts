@@ -31,7 +31,22 @@ app.post('/', async (req, res) => {
     }
 });
 
-app.get('/', async (req, res) => {
+app.get('/api', async (req, res) => {
+    const t = JSON.parse(req.query.t as string)
+    console.log('t=', t)
+
+    // Example of tx
+    // {
+    //   from: '0xc1531732b4f63b77a5ea38f4e5dbf5553f02c9be',
+    //   to: '0x68b3465833fb72a70ecdf485e0e4c7bd8665fc45',
+    //   value: '0x5af3107a4000',
+    //   data: '0x5a...',
+    //   gas: '0x2d3f3',
+    //   maxFeePerGas: '0x26944272a',
+    //   maxPriorityFeePerGas: '0x59682f00',
+    //   chainId: 'eip155:5'
+    // }
+
     res.setHeader("access-control-allow-origin", "*")
     res.json({"Firemask Metawall": "Metamask Firewall"});
 });
