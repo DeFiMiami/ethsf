@@ -22,13 +22,14 @@ app.listen(port, () => {
 });
 
 app.get("/", (req, res) => {
- res.sendFile(path.join(__dirname, "..", "public", "index.html"));
+    res.sendFile(path.join(__dirname, "..", "public", "index.html"));
 });
 
 app.post('/api', async (req, res) => {
     try {
         let signedTransaction = req.body.transaction;
-        let result = await dryRunTransaction(signedTransaction);
+        let result = await dryRunSignedTransaction(signedTransaction);
+
         res.setHeader("access-control-allow-origin", "*")
         res.json(result);
     } catch (e) {
@@ -37,29 +38,32 @@ app.post('/api', async (req, res) => {
     }
 });
 
+// Example of tx
+// {
+//   from: '0xc1531732b4f63b77a5ea38f4e5dbf5553f02c9be',
+//   to: '0x68b3465833fb72a70ecdf485e0e4c7bd8665fc45',
+//   value: '0x5af3107a4000',
+//   data: '0x5a...',
+//   gas: '0x2d3f3',
+//   maxFeePerGas: '0x26944272a',
+//   maxPriorityFeePerGas: '0x59682f00',
+//   chainId: 'eip155:5'
+// }
 app.get('/api', async (req, res) => {
-    const t = JSON.parse(req.query.t as string)
-    console.log('t=', t)
+    try {
+        const transactionData = JSON.parse(req.query.t as string)
+        let result = await dryRunTransaction(transactionData)
 
-    // Example of tx
-    // {
-    //   from: '0xc1531732b4f63b77a5ea38f4e5dbf5553f02c9be',
-    //   to: '0x68b3465833fb72a70ecdf485e0e4c7bd8665fc45',
-    //   value: '0x5af3107a4000',
-    //   data: '0x5a...',
-    //   gas: '0x2d3f3',
-    //   maxFeePerGas: '0x26944272a',
-    //   maxPriorityFeePerGas: '0x59682f00',
-    //   chainId: 'eip155:5'
-    // }
-
-    res.setHeader("access-control-allow-origin", "*")
-    res.json({"Firemask Metawall": "Metamask Firewall"});
+        res.setHeader("access-control-allow-origin", "*")
+        res.json(result);
+    } catch (e) {
+        console.log(e)
+        res.status(500).json(e);
+    }
 });
 
-async function dryRunTransaction(serializedTransaction) {
-    let deserializedTx = await ethers.utils.parseTransaction(serializedTransaction);
-    let tenderlyData = await simulateWithTenderly(deserializedTx);
+async function dryRunTransaction(transaction) {
+    let tenderlyData = await simulateWithTenderly(transaction);
 
     if (!tenderlyData.transaction.status) {
         return {"Transaction failed": tenderlyData.transaction.error_message}
@@ -81,7 +85,7 @@ async function dryRunTransaction(serializedTransaction) {
                 betterName = toContract.contract_name
             }
         }
-        if (deserializedTx.from == contractAddress) {
+        if (transaction.from == contractAddress) {
             betterName = "Me"
         }
         return betterName;
@@ -140,9 +144,14 @@ async function dryRunTransaction(serializedTransaction) {
     return result
 }
 
+async function dryRunSignedTransaction(serializedTransaction) {
+    let deserializedTx = await ethers.utils.parseTransaction(serializedTransaction);
+    return dryRunTransaction(deserializedTx)
+}
+
 async function simulateWithTenderly(deserializedTx: Transaction) {
     let tenderlyBody = {
-        network_id: deserializedTx.chainId,
+        network_id: 5,
         from: deserializedTx.from,
         to: deserializedTx.to,
         input: deserializedTx.data,
