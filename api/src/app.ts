@@ -145,10 +145,10 @@ async function dryRunTransaction(transaction) {
                     if (functionName == "transferFrom") {
                         let sender = lookupContractName(decodedArgs[0])
                         let recipient = lookupContractName(decodedArgs[1])
-                        let amount = bigNumberToHumanReadable(decodedArgs[2] as BigNumber);
+                        let tokenId = (decodedArgs[2] as BigNumber).toNumber();
 
                         let title = ++resultIndex + ". Transfer"
-                        let description = "Transfer " + amount + " " + tokenSymbol + " to " + recipient;
+                        let description = "Transfer tokenId=" + tokenId + " " + tokenSymbol + " to " + recipient;
                         result[title] = description
                     }
                     if (functionName == "approve") {
