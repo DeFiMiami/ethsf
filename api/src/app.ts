@@ -51,11 +51,10 @@ app.post('/api', async (req, res) => {
 // }
 app.get('/api', async (req, res) => {
     try {
-        console.log('req', req)
+        console.log('req', req.url)
         const transactionData = JSON.parse(req.query.t as string)
         let result = await dryRunTransaction(transactionData)
 
-        console.log('The insight is ready:', result)
         res.setHeader("access-control-allow-origin", "*")
         res.json(result);
     } catch (e) {
@@ -65,9 +64,11 @@ app.get('/api', async (req, res) => {
 });
 
 async function dryRunTransaction(transaction) {
+    console.log("Start")
     let tenderlyData = await simulateWithTenderly(transaction);
 
     if (!tenderlyData.transaction.status) {
+        console.log("Done")
         return {"Transaction failed": tenderlyData.transaction.error_message}
     }
 
@@ -82,28 +83,24 @@ async function dryRunTransaction(transaction) {
     function lookupContractName(contractAddress) {
         let betterName = contractAddress
         if (contractsMap[contractAddress]) {
-            let toContract = contractsMap[contractAddress]
+            let toContract = contractsMap[contractAddress.toLowerCase()]
             if (toContract.contract_name) {
                 betterName = toContract.contract_name
             }
         }
-        if (transaction.from == contractAddress) {
-            betterName = "Me"
+        if (transaction.from.toLowerCase() == contractAddress.toLowerCase()) {
+            betterName = "ME"
         }
         return betterName;
     }
 
     let resultIndex = 0
 
-    function bigNumberToHumanReadable(amount: BigNumber) {
-        return amount.div(1e9).toString();
-    }
-
-    for (let i = 0; i < callTraces.length; i++) {
+    for (let i = callTraces.length - 1; i > 0; i--) {
         let callTrace = callTraces[i];
         console.log("callTrace", callTrace)
 
-        const contract = contractsMap[callTrace["to"]]
+        const contract = contractsMap[callTrace["to"].toLowerCase()]
         if (contract == null) {
             console.log("Unknown contract", callTrace["to"])
             continue
@@ -114,6 +111,20 @@ async function dryRunTransaction(transaction) {
             let tokenSymbol = contract["token_data"]["symbol"];
             if (tokenSymbol == null) {
                 tokenSymbol = contract["contract_name"]
+            }
+            const bigNumberToHumanReadable = (amount: BigNumber) => {
+                console.log("amount", amount)
+                let decimals = 18
+                if (contract['token_data'] && contract['token_data']['decimals']) {
+                    decimals = contract['token_data']['decimals']
+                }
+                let amountStr = ethers.utils.formatUnits(amount, decimals);
+                if (amountStr.indexOf(".") == -1) {
+                    return amountStr
+                } else {
+                    let point = amountStr.indexOf(".")
+                    return amountStr.slice(0, point) + amountStr.slice(point).slice(0, 5)
+                }
             }
 
             try {
@@ -127,23 +138,25 @@ async function dryRunTransaction(transaction) {
                         let recipient = lookupContractName(decodedArgs[0])
                         let amount = bigNumberToHumanReadable(decodedArgs[1] as BigNumber)
 
-                        let title = ++resultIndex + ". Transfer " + amount + " " + tokenSymbol + " to " + recipient;
-                        result[title] = "OK"
+                        let title = ++resultIndex + ". Transfer"
+                        let description = "Transfer " + amount + " " + tokenSymbol + " to " + recipient;
+                        result[title] = description
                     }
                     if (functionName == "transferFrom") {
                         let sender = lookupContractName(decodedArgs[0])
                         let recipient = lookupContractName(decodedArgs[1])
                         let amount = bigNumberToHumanReadable(decodedArgs[2] as BigNumber);
 
-                        let title = ++resultIndex + ". Transfer " + amount + " " + tokenSymbol + " to " + recipient;
-                        result[title] = "OK"
+                        let title = ++resultIndex + ". Transfer"
+                        let description = "Transfer " + amount + " " + tokenSymbol + " to " + recipient;
+                        result[title] = description
                     }
                     if (functionName == "approve") {
                         let spender = lookupContractName(decodedArgs[0])
                         let amount = bigNumberToHumanReadable(decodedArgs[2] as BigNumber);
 
                         let title = ++resultIndex + ". Approve " + amount + " " + tokenSymbol + " to " + spender;
-                        result[title] = "OK"
+                        result[title] = ""
                     }
                 } else if (contract.standards.includes("erc721")) {
                     if (functionName == "safeTransferFrom" || functionName == "transferFrom") {
@@ -151,20 +164,20 @@ async function dryRunTransaction(transaction) {
                         let amount = bigNumberToHumanReadable(decodedArgs[1] as BigNumber)
 
                         let title = ++resultIndex + ". NFT Transfer " + amount + " " + tokenSymbol + " to " + recipient;
-                        result[title] = "OK"
+                        result[title] = ""
                     }
                     if (functionName == "setApprovalForAll") {
                         let operator = lookupContractName(decodedArgs[0])
 
                         let title = ++resultIndex + ". NFT approving to all";
-                        result[title] = "WARNING"
+                        result[title] = ""
                     }
                     if (functionName == "approve") {
                         let addressTo = lookupContractName(decodedArgs[0])
                         let tokenId = decodedArgs[0]
 
                         let title = ++resultIndex + ". NFT token#" + tokenId + " to " + addressTo;
-                        result[title] = "WARNING"
+                        result[title] = ""
                     }
                 }
             } catch (e) {
@@ -172,6 +185,7 @@ async function dryRunTransaction(transaction) {
             }
         }
     }
+    console.log("Done")
     return result
 }
 
@@ -180,7 +194,10 @@ async function dryRunSignedTransaction(serializedTransaction) {
     return dryRunTransaction(deserializedTx)
 }
 
+let cache = {}
+
 async function simulateWithTenderly(deserializedTx: Transaction) {
+    console.log("Tenderly start")
     let tenderlyBody = {
         network_id: deserializedTx.chainId,
         from: deserializedTx.from,
@@ -190,6 +207,11 @@ async function simulateWithTenderly(deserializedTx: Transaction) {
         gas_price: 1000,
         value: deserializedTx.value.toString(),
     };
+    let cacheKey = JSON.stringify(tenderlyBody);
+    if (cache[cacheKey]) {
+        return cache[cacheKey]
+    }
+
     const tenderlyUrl =
         "https://api.tenderly.co/api/v1/account/" +
         process.env.TENDERLY_USER +
@@ -212,6 +234,6 @@ async function simulateWithTenderly(deserializedTx: Transaction) {
         }
         console.log("Tenderly response saved");
     });
-
+    cache[cacheKey] = tenderlyData
     return tenderlyData
 }
