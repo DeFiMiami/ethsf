@@ -1,6 +1,6 @@
 import express from 'express';
 import * as dotenv from "dotenv";
-import {ethers, Transaction} from "ethers";
+import {BigNumber, ethers, Transaction} from "ethers";
 import axios from "axios";
 import {legos} from "@studydefi/money-legos";
 import * as fs from "fs";
@@ -72,36 +72,63 @@ async function dryRunTransaction(serializedTransaction) {
 
     let result = {}
     let callTraces = tenderlyData.transaction.call_trace;
+
+    function lookupContractName(contractAddress) {
+        let betterName = contractAddress
+        if (contractsMap[contractAddress]) {
+            let toContract = contractsMap[contractAddress]
+            if (toContract.contract_name) {
+                betterName = toContract.contract_name
+            }
+        }
+        if (deserializedTx.from == contractAddress) {
+            betterName = "Me"
+        }
+        return betterName;
+    }
+
+    let resultIndex = 0
+
+    function bigNumberToHumanReadable(amount: BigNumber) {
+        return amount.toString();
+    }
+
     for (let i = 0; i < callTraces.length; i++) {
         let callTrace = callTraces[i];
+        console.log("callTrace", callTrace)
+
         const contract = contractsMap[callTrace["to"]]
         if (contract == null) {
-            console.log({"Unknown contract": callTrace["to"]})
+            console.log("Unknown contract", callTrace["to"])
             continue
         }
 
         if (contract.standards && contract.standards.includes("erc20")) {
-            console.log(callTrace)
+            let tokenSymbol = contract["token_data"]["symbol"];
+            if (tokenSymbol == null) {
+                tokenSymbol = contract["contract_name"]
+            }
 
             try {
                 const iface = new ethers.utils.Interface(legos.erc20.abi);
                 const decodedArgs = iface.decodeFunctionData(callTrace.input.slice(0, 10), callTrace.input)
                 const functionName = iface.getFunction(callTrace.input.slice(0, 10)).name
                 console.log(functionName, decodedArgs)
-                if (functionName == "transfer") {
-                    let toName = decodedArgs[0]
-                    if (contractsMap[toName]) {
-                        let toContract = contractsMap[toName]
-                        if (toContract.contract_name) {
-                            toName = toContract.contract_name
-                        }
-                    }
-                    if (deserializedTx.from == toName) {
-                        toName = "Me"
-                    }
 
-                    let amount = (decodedArgs[1].toNumber() / 1e18).toPrecision(6)
-                    let title = "Transfer " + amount + " " + contract["token_data"]["symbol"] + " to " + toName;
+                if (functionName == "transfer") {
+                    let recipient = lookupContractName(decodedArgs[0])
+                    let amount = bigNumberToHumanReadable(decodedArgs[1] as BigNumber)
+
+                    let title = ++resultIndex + ". Transfer " + amount + " " + tokenSymbol + " to " + recipient;
+                    let description = "OK";
+                    result[title] = description
+                }
+                if (functionName == "transferFrom") {
+                    let sender = lookupContractName(decodedArgs[0])
+                    let recipient = lookupContractName(decodedArgs[1])
+                    let amount = bigNumberToHumanReadable(decodedArgs[2] as BigNumber);
+
+                    let title = ++resultIndex + ". Transfer " + amount + " " + tokenSymbol + " to " + recipient;
                     let description = "OK";
                     result[title] = description
                 }
@@ -119,8 +146,8 @@ async function simulateWithTenderly(deserializedTx: Transaction) {
         from: deserializedTx.from,
         to: deserializedTx.to,
         input: deserializedTx.data,
-        gas: 200000,
-        gas_price: 100,
+        gas: 2000000,
+        gas_price: 1000,
         value: deserializedTx.value.toString(),
     };
     const tenderlyUrl =
