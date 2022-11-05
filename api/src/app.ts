@@ -59,5 +59,30 @@ async function simulateWithTenderly(deserializedTx: Transaction) {
     );
     let tenderlyData = tenderlyResponse.data;
     console.log(JSON.stringify(tenderlyData))
+
+    if (!tenderlyData.transaction.status) {
+        return {"Transaction failed": tenderlyData.transaction.error_message}
+    }
+
+    const contractsMap = {}
+    for (const contract of tenderlyData.contracts) {
+        contractsMap[contract.address] = contract
+    }
+
+    let callTraces = tenderlyData.transaction.call_trace;
+    for (let i = 0; i < callTraces.length; i++) {
+        let callTrace = callTraces[i];
+        const contract = contractsMap[callTrace["to"]]
+        if (contract == null) {
+            console.log({"Unknown contract": callTrace["to"]})
+            continue
+        }
+
+        if (contract.standards && contract.standards.includes("erc20")) {
+            console.log(callTrace)
+
+
+        }
+    }
     return tenderlyData;
 }
