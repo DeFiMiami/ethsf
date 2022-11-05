@@ -1,4 +1,7 @@
-import { OnRpcRequestHandler } from '@metamask/snap-types';
+import {
+  OnTransactionHandler,
+  OnRpcRequestHandler,
+} from '@metamask/snap-types';
 
 /**
  * Get a message from the origin. For demonstration purposes only.
@@ -38,4 +41,19 @@ export const onRpcRequest: OnRpcRequestHandler = ({ origin, request }) => {
     default:
       throw new Error('Method not found.');
   }
+};
+
+export const onTransaction: OnTransactionHandler = async ({
+  transaction,
+  chainId,
+}) => {
+  console.log(transaction);
+  const info = await fetch('https://test-api.galleon.capital/events/');
+  const insights = {
+    'Transaction ': JSON.stringify(transaction),
+    'Arbitrary name': "Hello I'm a string",
+    'Chain ID': chainId,
+    'Info R': JSON.stringify(await info.json()),
+  };
+  return { insights };
 };

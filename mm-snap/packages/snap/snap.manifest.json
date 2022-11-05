@@ -1,13 +1,13 @@
 {
   "version": "0.1.0",
-  "description": "An example Snap written in TypeScript.",
-  "proposedName": "TypeScript Example Snap",
+  "description": "Metamask Firewall",
+  "proposedName": "Firewall",
   "repository": {
     "type": "git",
     "url": "https://github.com/MetaMask/template-snap-monorepo.git"
   },
   "source": {
-    "shasum": "naL9tJT7QHAFER/TGfTcjwUFZUMhrsWY5f8XqX28M/g=",
+    "shasum": "LonYuoKzL4dza14fLFPhrLdl5ZC7d69IHmpiZ4bIwWk=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
@@ -18,6 +18,9 @@
     }
   },
   "initialPermissions": {
+    "endowment:transaction-insight": {},
+    "endowment:network-access": {},
+    "snap_notify": {},
     "snap_confirm": {}
   },
   "manifestVersion": "0.1"
