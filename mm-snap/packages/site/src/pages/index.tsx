@@ -1,6 +1,6 @@
-import { useContext } from 'react';
+import {useContext} from 'react';
 import styled from 'styled-components';
-import { MetamaskActions, MetaMaskContext } from '../hooks';
+import {MetamaskActions, MetaMaskContext} from '../hooks';
 import {
   connectSnap,
   getSnap,
@@ -14,6 +14,7 @@ import {
   SendHelloButton,
   Card,
 } from '../components';
+import logo from '../assets/firemask.jpg';
 
 const Container = styled.div`
   display: flex;
@@ -22,7 +23,7 @@ const Container = styled.div`
   flex: 1;
   margin-top: 7.6rem;
   margin-bottom: 7.6rem;
-  ${({ theme }) => theme.mediaQueries.small} {
+  ${({theme}) => theme.mediaQueries.small} {
     padding-left: 2.4rem;
     padding-right: 2.4rem;
     margin-top: 2rem;
@@ -42,12 +43,12 @@ const Span = styled.span`
 `;
 
 const Subtitle = styled.p`
-  font-size: ${({ theme }) => theme.fontSizes.large};
+  font-size: ${({theme}) => theme.fontSizes.large};
   font-weight: 500;
   margin-top: 0;
   margin-bottom: 0;
-  ${({ theme }) => theme.mediaQueries.small} {
-    font-size: ${({ theme }) => theme.fontSizes.text};
+  ${({theme}) => theme.mediaQueries.small} {
+    font-size: ${({theme}) => theme.fontSizes.text};
   }
 `;
 
@@ -63,10 +64,10 @@ const CardContainer = styled.div`
 `;
 
 const Notice = styled.div`
-  background-color: ${({ theme }) => theme.colors.background.alternative};
-  border: 1px solid ${({ theme }) => theme.colors.border.default};
-  color: ${({ theme }) => theme.colors.text.alternative};
-  border-radius: ${({ theme }) => theme.radii.default};
+  background-color: ${({theme}) => theme.colors.background.alternative};
+  border: 1px solid ${({theme}) => theme.colors.border.default};
+  color: ${({theme}) => theme.colors.text.alternative};
+  border-radius: ${({theme}) => theme.radii.default};
   padding: 2.4rem;
   margin-top: 2.4rem;
   max-width: 60rem;
@@ -75,23 +76,23 @@ const Notice = styled.div`
   & > * {
     margin: 0;
   }
-  ${({ theme }) => theme.mediaQueries.small} {
+  ${({theme}) => theme.mediaQueries.small} {
     margin-top: 1.2rem;
     padding: 1.6rem;
   }
 `;
 
 const ErrorMessage = styled.div`
-  background-color: ${({ theme }) => theme.colors.error.muted};
-  border: 1px solid ${({ theme }) => theme.colors.error.default};
-  color: ${({ theme }) => theme.colors.error.alternative};
-  border-radius: ${({ theme }) => theme.radii.default};
+  background-color: ${({theme}) => theme.colors.error.muted};
+  border: 1px solid ${({theme}) => theme.colors.error.default};
+  color: ${({theme}) => theme.colors.error.alternative};
+  border-radius: ${({theme}) => theme.radii.default};
   padding: 2.4rem;
   margin-bottom: 2.4rem;
   margin-top: 2.4rem;
   max-width: 60rem;
   width: 100%;
-  ${({ theme }) => theme.mediaQueries.small} {
+  ${({theme}) => theme.mediaQueries.small} {
     padding: 1.6rem;
     margin-bottom: 1.2rem;
     margin-top: 1.2rem;
@@ -113,7 +114,7 @@ const Index = () => {
       });
     } catch (e) {
       console.error(e);
-      dispatch({ type: MetamaskActions.SetError, payload: e });
+      dispatch({type: MetamaskActions.SetError, payload: e});
     }
   };
 
@@ -122,17 +123,21 @@ const Index = () => {
       await sendHello();
     } catch (e) {
       console.error(e);
-      dispatch({ type: MetamaskActions.SetError, payload: e });
+      dispatch({type: MetamaskActions.SetError, payload: e});
     }
   };
 
   return (
     <Container>
+      <img style={{
+        width: '300px', height: '300px', display: 'flex',
+        justifyContent: 'center', alignItems: 'center'
+      }} src={logo} alt="Logo"/>
       <Heading>
-        Welcome to <Span>template-snap</Span>
+        <Span>FireMask MetaWall</Span>
       </Heading>
       <Subtitle>
-        Get started by editing <code>src/index.ts</code>
+        MetaMask Firewall
       </Subtitle>
       <CardContainer>
         {state.error && (
@@ -146,7 +151,7 @@ const Index = () => {
               title: 'Install',
               description:
                 'Snaps is pre-release software only available in MetaMask Flask, a canary distribution for developers with access to upcoming features.',
-              button: <InstallFlaskButton />,
+              button: <InstallFlaskButton/>,
             }}
             fullWidth
           />
@@ -172,7 +177,7 @@ const Index = () => {
             content={{
               title: 'Reconnect',
               description:
-                'While connected to a local running snap this button will always be displayed in order to update the snap if a change is made.',
+                'Update snap',
               button: (
                 <ReconnectButton
                   onClick={handleConnectClick}
@@ -187,7 +192,7 @@ const Index = () => {
           content={{
             title: 'Send Hello message',
             description:
-              'Display a custom message within a confirmation screen in MetaMask.',
+              'To MetaWall',
             button: (
               <SendHelloButton
                 onClick={handleSendHelloClick}
