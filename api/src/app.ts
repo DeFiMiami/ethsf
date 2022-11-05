@@ -1,9 +1,10 @@
 import express from 'express';
 import * as dotenv from "dotenv";
-import {BigNumber, ethers, Transaction} from "ethers";
-import axios from "axios";
-import {legos} from "@studydefi/money-legos";
-import * as fs from "fs";
+import {BigNumber, ethers} from "ethers";
+import {abi as ERC20_abi} from "@openzeppelin/contracts/build/contracts/ERC20.json";
+import {abi as ERC721_abi} from "@openzeppelin/contracts/build/contracts/ERC721.json";
+import {abi as ERC1155_abi} from "@openzeppelin/contracts/build/contracts/ERC1155.json";
+
 import path from "path";
 import {simulateWithTenderly} from "./tenderly-utils";
 
@@ -107,8 +108,23 @@ async function dryRunTransaction(transaction) {
             continue
         }
 
-        if (contract.standards &&
-            (contract.standards.includes("erc20") || contract.standards.includes("erc721"))) {
+        try {
+            let iface
+            if (contract.standards.includes("erc20")) {
+                iface = new ethers.utils.Interface(ERC20_abi);
+            } else if (contract.standards.includes("erc721")) {
+                iface = new ethers.utils.Interface(ERC721_abi);
+            } else if (contract.standards.includes("erc1155")) {
+                iface = new ethers.utils.Interface(ERC1155_abi);
+            } else {
+                console.log("Skipping contract", contract["address"])
+                continue
+            }
+
+            const decodedArgs = iface.decodeFunctionData(callTrace.input.slice(0, 10), callTrace.input)
+            const functionName = iface.getFunction(callTrace.input.slice(0, 10)).name
+            console.log(functionName, decodedArgs)
+
             let tokenSymbol = contract["token_data"]["symbol"];
             if (tokenSymbol == null) {
                 tokenSymbol = contract["contract_name"]
@@ -127,64 +143,57 @@ async function dryRunTransaction(transaction) {
                     return amountStr.slice(0, point) + amountStr.slice(point).slice(0, 7)
                 }
             }
+            if (contract.standards.includes("erc20")) {
+                if (functionName == "transfer") {
+                    let recipient = lookupContractName(decodedArgs[0])
+                    let amount = bigNumberToHumanReadable(decodedArgs[1] as BigNumber)
 
-            try {
-                const iface = new ethers.utils.Interface(legos.erc20.abi);
-                const decodedArgs = iface.decodeFunctionData(callTrace.input.slice(0, 10), callTrace.input)
-                const functionName = iface.getFunction(callTrace.input.slice(0, 10)).name
-                console.log(functionName, decodedArgs)
-
-                if (contract.standards.includes("erc20")) {
-                    if (functionName == "transfer") {
-                        let recipient = lookupContractName(decodedArgs[0])
-                        let amount = bigNumberToHumanReadable(decodedArgs[1] as BigNumber)
-
-                        let title = ++resultIndex + ". Transfer"
-                        let description = "Transfer " + amount + " " + tokenSymbol + " to " + recipient;
-                        result[title] = description
-                    }
-                    if (functionName == "transferFrom") {
-                        let sender = lookupContractName(decodedArgs[0])
-                        let recipient = lookupContractName(decodedArgs[1])
-                        let tokenId = (decodedArgs[2] as BigNumber).toNumber();
-
-                        let title = ++resultIndex + ". Transfer"
-                        let description = "Transfer tokenId=" + tokenId + " " + tokenSymbol + " to " + recipient;
-                        result[title] = description
-                    }
-                    if (functionName == "approve") {
-                        let spender = lookupContractName(decodedArgs[0])
-                        let amount = bigNumberToHumanReadable(decodedArgs[2] as BigNumber);
-
-                        let title = ++resultIndex + ". Approve " + amount + " " + tokenSymbol + " to " + spender;
-                        result[title] = ""
-                    }
-                } else if (contract.standards.includes("erc721")) {
-                    if (functionName == "safeTransferFrom" || functionName == "transferFrom") {
-                        let recipient = lookupContractName(decodedArgs[0])
-                        let amount = bigNumberToHumanReadable(decodedArgs[1] as BigNumber)
-
-                        let title = ++resultIndex + ". NFT Transfer " + amount + " " + tokenSymbol + " to " + recipient;
-                        result[title] = ""
-                    }
-                    if (functionName == "setApprovalForAll") {
-                        let operator = lookupContractName(decodedArgs[0])
-
-                        let title = ++resultIndex + ". NFT approving to all";
-                        result[title] = ""
-                    }
-                    if (functionName == "approve") {
-                        let addressTo = lookupContractName(decodedArgs[0])
-                        let tokenId = decodedArgs[0]
-
-                        let title = ++resultIndex + ". NFT token#" + tokenId + " to " + addressTo;
-                        result[title] = ""
-                    }
+                    let title = ++resultIndex + ". Transfer"
+                    let description = "Transfer " + amount + " " + tokenSymbol + " to " + recipient;
+                    result[title] = description
                 }
-            } catch (e) {
-                console.log(e, "Failed to decode callTrace for " + contract.address)
+                if (functionName == "transferFrom") {
+                    let sender = lookupContractName(decodedArgs[0])
+                    let recipient = lookupContractName(decodedArgs[1])
+                    let amount = bigNumberToHumanReadable(decodedArgs[2] as BigNumber);
+
+                    let title = ++resultIndex + ". Transfer"
+                    let description = "Transfer " + amount + " " + tokenSymbol + " to " + recipient;
+                    result[title] = description
+                }
+                if (functionName == "approve") {
+                    let spender = lookupContractName(decodedArgs[0])
+                    let amount = bigNumberToHumanReadable(decodedArgs[2] as BigNumber);
+
+                    let title = ++resultIndex + ". Approve " + amount + " " + tokenSymbol + " to " + spender;
+                    result[title] = ""
+                }
+            } else if (contract.standards.includes("erc721")) {
+                if (functionName == "safeTransferFrom" || functionName == "transferFrom") {
+                    let recipient = lookupContractName(decodedArgs[0])
+                    let amount = bigNumberToHumanReadable(decodedArgs[1] as BigNumber)
+
+                    let title = ++resultIndex + ". NFT Transfer " + amount + " " + tokenSymbol + " to " + recipient;
+                    result[title] = ""
+                }
+                if (functionName == "setApprovalForAll") {
+                    let operator = lookupContractName(decodedArgs[0])
+
+                    let title = ++resultIndex + ". NFT approving to all";
+                    result[title] = ""
+                }
+                if (functionName == "approve") {
+                    let addressTo = lookupContractName(decodedArgs[0])
+                    let tokenId = decodedArgs[0]
+
+                    let title = ++resultIndex + ". NFT token#" + tokenId + " to " + addressTo;
+                    result[title] = ""
+                }
             }
+        } catch (e) {
+            console.log(e, "Failed to decode callTrace for " + contract.address)
         }
+
     }
     console.log("Done")
     return result
