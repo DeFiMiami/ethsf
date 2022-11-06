@@ -93,7 +93,7 @@ async function dryRunTransaction(transaction) {
             }
         }
         if (transaction.from.toLowerCase() == contractAddress.toLowerCase()) {
-            betterName = "ME"
+            betterName = "Myself"
         }
         let duneContractName = await lookupContractNameInDune(contractAddress)
         if (duneContractName) {
