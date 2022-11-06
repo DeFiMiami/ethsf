@@ -189,10 +189,12 @@ async function dryRunTransaction(transaction) {
                     let recipient = await addressToHumanReadable(decodedArgs[1])
                     let tokenId = (decodedArgs[2] as BigNumber).toNumber();
 
-                    const quicknodeData = await getNFTinfo(decodedArgs[0], decodedArgs[1], contract["address"], tokenId)
+                    const quicknodeData = await getNFTinfo(decodedArgs[0], decodedArgs[1], contract.address, tokenId)
 
-                    let title = ++resultIndex + `. NFT transfer from collection '${quicknodeData.collectionName}'`;
-                    let description = `Transfer token '${quicknodeData.name}' from ${await addressToHumanReadable(quicknodeData.currentOwner)} to ${recipient}`;
+                    let title = ++resultIndex + `. NFT transfer`;
+                    let description = `Transfer token '${quicknodeData.name}' from `
+                        + `${await addressToHumanReadable(quicknodeData.currentOwner)} to ${recipient}.`
+                        + ` Collection '${quicknodeData.collectionName}' (${formatAddress(contract.address)})`;
                     result[title] = description
                 }
                 if (functionName == "setApprovalForAll") {
