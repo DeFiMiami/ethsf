@@ -135,9 +135,6 @@ const Index = () => {
         <Span style={{color: '#d02c1c'}}>Fire</Span>
         <Span style={{color: 'rgb(254 135 23)'}}>Mask</Span>
         &nbsp;
-        <Span style={{color: 'rgb(223 89 34)'}}>Meta</Span>
-        <Span style={{color: '#d02c1c'}}>Wall</Span>
-        &nbsp;
         <Span>- MetaMask Firewall</Span>
       </Heading>
       <CardContainer style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
