@@ -14,6 +14,6 @@ export async function getNFTinfo(from, recipient, contract, tokenId) {
       `${contract}:${tokenId}`
     ],
   });
-  const asset = heads.assets[0]
-  return `Name: ${asset.name}, Collection: ${asset.collectionName}, Sender: ${asset.currentOwner}, Receiver: ${recipient}`
+  return heads.assets[0]
+  // return `Name: ${asset.name}, Collection: ${asset.collectionName}, Sender: ${asset.currentOwner}, Receiver: ${recipient}`
 }
