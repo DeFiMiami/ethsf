@@ -107,6 +107,14 @@ async function dryRunTransaction(transaction) {
     }
 
     let resultIndex = 0
+    if (tenderlyData.transaction.value) {
+        let nativeToken = 'ETH' // TODO set based on chainId
+        let title = ++resultIndex + `. Transfer ${nativeToken}`
+        let amountStr = ethers.utils.formatUnits(tenderlyData.transaction.value, 18);
+        let recipient = await addressToHumanReadable(tenderlyData.transaction.to)
+        let description = `Transfer ${amountStr} ${nativeToken} to ${recipient}`
+        result[title] = description
+    }
 
     for (let i = callTraces.length - 1; i > 0; i--) {
         let callTrace = callTraces[i];
