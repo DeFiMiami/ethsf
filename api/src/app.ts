@@ -180,7 +180,7 @@ async function dryRunTransaction(transaction) {
                     let recipient = lookupContractName(decodedArgs[1])
                     let tokenId = (decodedArgs[2] as BigNumber).toNumber();
 
-                    const quicknodeData = await getNFTinfo(from, contract["address"], tokenId)
+                    const quicknodeData = await getNFTinfo(from, recipient, contract["address"], tokenId)
 
                     // let title = ++resultIndex + ". NFT Transfer";
                     // let description = "Transfer NFT token #" + tokenId + " to " + recipient;
