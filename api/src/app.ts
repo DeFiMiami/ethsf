@@ -7,6 +7,7 @@ import {abi as ERC1155_abi} from "@openzeppelin/contracts/build/contracts/ERC115
 
 import path from "path";
 import {simulateWithTenderly} from "./tenderly-utils";
+import {getNFTinfo} from "./quicknode-utils";
 
 require('console-stamp')(console);
 
@@ -107,6 +108,10 @@ async function dryRunTransaction(transaction) {
             console.log("Unknown contract", callTrace["to"])
             continue
         }
+        if (!contract.standards) {
+            console.log("No standards for contract", contract["address"])
+            continue
+        }
 
         try {
             let iface
@@ -175,13 +180,11 @@ async function dryRunTransaction(transaction) {
                     let recipient = lookupContractName(decodedArgs[1])
                     let tokenId = (decodedArgs[2] as BigNumber).toNumber();
 
-                    const quicknodeData = getNFTinfo(from,
-                          contract["address"], tokenId)
-                          .then((result) => console.log(result))
+                    const quicknodeData = await getNFTinfo(from, contract["address"], tokenId)
 
                     // let title = ++resultIndex + ". NFT Transfer";
                     // let description = "Transfer NFT token #" + tokenId + " to " + recipient;
-                    result['NFT Indights'] = quicknodeData
+                    result['NFT Transfer'] = quicknodeData
                 }
                 if (functionName == "setApprovalForAll") {
                     let operator = lookupContractName(decodedArgs[0])
