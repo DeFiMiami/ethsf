@@ -84,18 +84,19 @@ async function dryRunTransaction(transaction) {
     let result = {}
     let callTraces = tenderlyData.transaction.call_trace;
 
-    async function lookupContractName(contractAddress) {
-        let betterName = contractAddress
-        if (contractsMap[contractAddress]) {
-            let toContract = contractsMap[contractAddress.toLowerCase()]
+    async function lookupNameByAddress(addressAddress) {
+        addressAddress = addressAddress.toLowerCase();
+        let betterName = addressAddress
+        if (contractsMap[addressAddress]) {
+            let toContract = contractsMap[addressAddress]
             if (toContract.contract_name) {
                 betterName = toContract.contract_name
             }
         }
-        if (transaction.from.toLowerCase() == contractAddress.toLowerCase()) {
+        if (transaction.from.toLowerCase() == addressAddress) {
             betterName = "Myself"
         }
-        let duneContractName = await lookupContractNameInDune(contractAddress)
+        let duneContractName = await lookupContractNameInDune(addressAddress)
         if (duneContractName) {
             betterName = duneContractName
         }
@@ -155,7 +156,7 @@ async function dryRunTransaction(transaction) {
             }
             if (contract.standards.includes("erc20")) {
                 if (functionName == "transfer") {
-                    let recipient = await lookupContractName(decodedArgs[0])
+                    let recipient = await lookupNameByAddress(decodedArgs[0])
                     let amount = bigNumberToHumanReadable(decodedArgs[1] as BigNumber)
 
                     let title = ++resultIndex + ". Transfer"
@@ -163,8 +164,8 @@ async function dryRunTransaction(transaction) {
                     result[title] = description
                 }
                 if (functionName == "transferFrom") {
-                    let sender = await lookupContractName(decodedArgs[0])
-                    let recipient = await lookupContractName(decodedArgs[1])
+                    let sender = await lookupNameByAddress(decodedArgs[0])
+                    let recipient = await lookupNameByAddress(decodedArgs[1])
                     let amount = bigNumberToHumanReadable(decodedArgs[2] as BigNumber);
 
                     let title = ++resultIndex + ". Transfer"
@@ -172,7 +173,7 @@ async function dryRunTransaction(transaction) {
                     result[title] = description
                 }
                 if (functionName == "approve") {
-                    let spender = await lookupContractName(decodedArgs[0])
+                    let spender = await lookupNameByAddress(decodedArgs[0])
                     let amount = bigNumberToHumanReadable(decodedArgs[2] as BigNumber);
 
                     let title = ++resultIndex + ". Approve " + amount + " " + tokenSymbol + " to " + spender;
@@ -181,8 +182,8 @@ async function dryRunTransaction(transaction) {
             } else if (contract.standards.includes("erc721")) {
 
                 if (functionName == "safeTransferFrom" || functionName == "transferFrom") {
-                    let from = await lookupContractName(decodedArgs[0])
-                    let recipient = await lookupContractName(decodedArgs[1])
+                    let from = await lookupNameByAddress(decodedArgs[0])
+                    let recipient = await lookupNameByAddress(decodedArgs[1])
                     let tokenId = (decodedArgs[2] as BigNumber).toNumber();
 
                     const quicknodeData = await getNFTinfo(from, recipient, contract["address"], tokenId)
@@ -192,13 +193,13 @@ async function dryRunTransaction(transaction) {
                     result['NFT Transfer'] = quicknodeData
                 }
                 if (functionName == "setApprovalForAll") {
-                    let operator = await lookupContractName(decodedArgs[0])
+                    let operator = await lookupNameByAddress(decodedArgs[0])
 
                     let title = ++resultIndex + ". NFT approving to all";
                     result[title] = "TODO"
                 }
                 if (functionName == "approve") {
-                    let addressTo = await lookupContractName(decodedArgs[0])
+                    let addressTo = await lookupNameByAddress(decodedArgs[0])
                     let tokenId = (decodedArgs[1] as BigNumber).toNumber();
 
                     let title = ++resultIndex + ". NFT approve";
