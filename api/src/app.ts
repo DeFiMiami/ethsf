@@ -107,7 +107,7 @@ async function dryRunTransaction(transaction) {
     }
 
     let resultIndex = 0
-    if (tenderlyData.transaction.value) {
+    if (tenderlyData.transaction.value && tenderlyData.transaction.value != '0x') {
         let nativeToken = 'ETH' // TODO set based on chainId
         let title = ++resultIndex + `. Transfer ${nativeToken}`
         let amountStr = ethers.utils.formatUnits(tenderlyData.transaction.value, 18);
